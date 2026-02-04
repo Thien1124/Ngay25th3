@@ -1,5 +1,8 @@
 const express = require('express')
 const app = express()
+
+app.use(express.json())
+
 const port = 3000
 let data = [
     {
@@ -35,13 +38,13 @@ let data = [
     {
         "id": "7",
         "title": "arap",
-        "views": 999,
-        "isDeleted": "true"
+        "views": 999
     },
     {
         "id": "99",
         "title": "909999",
-        "views": 99
+        "views": 99,
+        "isDeleted": "true"
     },
     {
         "id": "9999",
@@ -88,14 +91,74 @@ app.get('/api/v1/products/:ids', (req, res) => {
     }
 
 })
-app.get('/api/v1/products/2', (req, res) => {
-    res.send('Hello World! 1')
+app.post('/api/v1/products', (req, res) => {
+    let id = req.body.id;
+    if (id) {
+        let result = data.filter(
+            function (e) {
+                return e.id == id
+            }
+        )
+        if (result.length > 0) {
+            res.status(404).send({
+                message: "duplicated id"
+            })
+            return;
+        }
+    } else {
+        let ids = data.map(
+            function (e) {
+                return Number.parseInt(e.id)
+            }
+        )
+        id = (Math.max(...ids) + 1) + "";
+    }
+    let newObj = {
+        id: id,
+        title: req.body.title,
+        views: req.body.views
+    }
+    data.push(newObj);
+    res.send(newObj)
 })
-app.put('/api/v1/products/1', (req, res) => {
-    res.send('Hello World! 1')
+app.put('/api/v1/products/:ids', (req, res) => {
+    let id = req.params.ids;
+    let result = data.filter(
+        function (e) {
+            return !(e.isDeleted) && e.id == id
+        }
+    )
+    if (result.length > 0) {
+        result = result[0];
+        let keys = Object.keys(req.body)
+        for (const key of keys) {
+            if (result[key]) {
+                result[key] = req.body[key]
+            }
+        }
+        res.send(result)
+    } else {
+        res.status(404).send({
+            message: "ID NOT FOUND"
+        })
+    }
 })
-app.delete('/api/v1/products/1', (req, res) => {
-    res.send('Hello World! 1')
+app.delete('/api/v1/products/:id', (req, res) => {
+    let id = req.params.ids;
+    let result = data.filter(
+        function (e) {
+            return !(e.isDeleted) && e.id == id
+        }
+    )
+    if (result.length > 0) {
+        result = result[0];
+        result.isDeleted = true;
+        res.send(result)
+    } else {
+        res.status(404).send({
+            message: "ID NOT FOUND"
+        })
+    }
 })
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
