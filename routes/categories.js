@@ -1,30 +1,32 @@
 var express = require('express');
 var router = express.Router();
-let { dataCategories, dataProducts } = require('../utils/data');
+//let { dataCategories, dataProducts } = require('../utils/data');
 const slugify = require('slugify');
 let { genID } = require('../utils/idHandler')
-
+let categoryModel = require('../schemas/categories')
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  let result = dataCategories.filter(
-    function (e) {
-      return !e.isDeleted
+router.get('/', async function (req, res, next) {
+  let dataCategories = await categoryModel.find(
+    {
+      isDeleted: false
     }
   )
-  res.send(result);
+  res.send(dataCategories);
 });
 ///api/v1/products/id
-router.get('/:id', function (req, res, next) {
-  let id = req.params.id;
-  let result = dataCategories.filter(
-    function (e) {
-      return e.id == id && !e.isDeleted
+router.get('/:id', async function (req, res, next) {
+  try {
+    let id = req.params.id;
+    let result = await categoryModel.findById(id);
+    if (!result || result.isDeleted) {
+      res.status(404).send({
+        message: "ID NOT FOUND"
+      });
+    } else {
+      res.send(result)
     }
-  )
-  if (result.length) {
-    res.send(result[0]);
-  } else {
+  } catch (error) {
     res.status(404).send({
       message: "ID NOT FOUND"
     });
@@ -50,58 +52,68 @@ router.get('/:id/products', function (req, res, next) {
     });
   }
 });
-router.post('/', function (req, res, next) {
-  let newCate = {
-    id: genID(dataCategories),
+router.post('/', async function (req, res, next) {
+  let newCate = new categoryModel({
     name: req.body.name,
     slug: slugify(req.body.name, {
       replacement: '-',
       remove: undefined,
       lower: true
     }),
-    image: req.body.image,
-    creationAt: new Date(Date.now()),
-    updatedAt: new Date(Date.now())
-  }
-  dataCategories.push(newCate),
-    res.send(newCate)
+    image: req.body.image
+  })
+  await newCate.save();
+  res.send(newCate)
 })
-router.put('/:id', function (req, res, next) {
-  let id = req.params.id;
-  let result = dataCategories.filter(
-    function (e) {
-      return e.id == id && !e.isDeleted
+router.put('/:id', async function (req, res, next) {
+  //cach 1
+  // try {
+  //   let id = req.params.id;
+  //   let result = await categoryModel.findById(id);
+  //   if (!result || result.isDeleted) {
+  //     res.status(404).send({
+  //       message: "ID NOT FOUND"
+  //     });
+  //   } else {
+  //     let keys = Object.keys(req.body);
+  //     for (const key of keys) {
+  //       result[key] = req.body[key];
+  //     }
+  //     await result.save();
+  //     res.send(result)
+  //   }
+  // } catch (error) {
+  //   res.status(404).send({
+  //     message: "ID NOT FOUND"
+  //   });
+  // }
+  //cach 2
+  try {
+    let id = req.params.id;
+    let result = await categoryModel.findByIdAndUpdate(
+      id, req.body, {
+      new: true
     }
-  )
-  if (result.length) {
-    result = result[0];
-    let keys = Object.keys(req.body);
-    for (const key of keys) {
-      if (result[key]) {
-        result[key] = req.body[key];
-        result.updatedAt = new Date(Date.now())
-      }
-    }
+    )
     res.send(result)
-  } else {
-    res.status(404).send({
-      message: "ID NOT FOUND"
-    });
+  } catch (error) {
+
   }
 })
-router.delete('/:id', function (req, res, next) {
-  let id = req.params.id;
-  let result = dataCategories.filter(
-    function (e) {
-      return e.id == id && !e.isDeleted
+router.delete('/:id', async function (req, res, next) {
+  try {
+    let id = req.params.id;
+    let result = await categoryModel.findById(id);
+    if (!result || result.isDeleted) {
+      res.status(404).send({
+        message: "ID NOT FOUND"
+      });
+    } else {
+      result.isDeleted = true;
+      await result.save();
+      res.send(result)
     }
-  )
-  if (result.length) {
-    result = result[0];
-    result.isDeleted = true;
-    result.updatedAt = new Date(Date.now())
-    res.send(result)
-  } else {
+  } catch (error) {
     res.status(404).send({
       message: "ID NOT FOUND"
     });

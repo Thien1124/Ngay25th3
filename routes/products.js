@@ -5,6 +5,7 @@ const slugify = require('slugify');
 let { genID, getItemById } = require('../utils/idHandler')
 
 
+
 router.get('/', function (req, res, next) {
   let result = dataProducts.filter(
     function (e) {
