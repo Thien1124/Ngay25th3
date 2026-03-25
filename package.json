@@ -1,22 +1,18 @@
 {
-  "name": "nnptud-c4",
-  "version": "0.0.0",
-  "private": true,
+  "name": "inventory-service",
+  "version": "1.0.0",
+  "description": "Inventory API with MongoDB",
+  "main": "src/server.js",
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "express-validator": "^7.3.1",
-    "hbs": "~4.0.4",
-    "http-errors": "~1.6.3",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.4",
-    "morgan": "~1.9.1",
-    "nodemon": "^3.1.11",
-    "slugify": "^1.6.6"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }
