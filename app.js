@@ -27,6 +27,13 @@ app.use('/api/v1/roles', require('./routes/roles'));
 app.use('/api/v1/products', require('./routes/products'))
 app.use('/api/v1/categories', require('./routes/categories'))
 app.use('/api/v1/auth', require('./routes/auth'))
+app.use('/api/v1/inventories', require('./routes/inventories'))
+
+app.get('/api/v1', function (req, res, next) {
+  res.send({
+    message: 'NNPTUD-C4 API is running'
+  })
+})
 
 
 mongoose.connect('mongodb://localhost:27017/NNPTUD-C4');
@@ -46,13 +53,15 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  let statusCode = err.status || 500;
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  if (req.originalUrl.startsWith('/api/')) {
+    return res.status(statusCode).send({
+      message: err.message || 'Internal Server Error'
+    })
+  }
+
+  res.status(statusCode).send(err.message || 'Internal Server Error');
 });
 
 module.exports = app;

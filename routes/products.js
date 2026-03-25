@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const slugify = require('slugify');
-let productModel = require('../schemas/products')
+let productModel = require('../schemas/product.model')
+let productController = require('../controllers/product.controller')
 
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
@@ -43,22 +43,7 @@ router.get('/:id', async function (req, res, next) {
     });
   }
 });
-router.post('/', async function (req, res, next) {
-  let newProduct = new productModel({
-    title: req.body.title,
-    slug: slugify(req.body.title, {
-      replacement: '-',
-      remove: undefined,
-      lower: true
-    }),
-    price: req.body.price,
-    description: req.body.description,
-    images: req.body.images,
-    category: req.body.category
-  })
-  await newProduct.save();
-  res.send(newProduct)
-})
+router.post('/', productController.CreateProductWithInventory)
 router.put('/:id', async function (req, res, next) {
   //cach 1
   // try {

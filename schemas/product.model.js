@@ -1,11 +1,12 @@
 let mongoose = require('mongoose');
-let productsSchema = mongoose.Schema({
 
+let productSchema = mongoose.Schema({
     title: {
         type: String,
         required: [true, "title khong duoic rong"],
         unique: true
-    }, slug: {
+    },
+    slug: {
         type: String,
         required: [true, "slug khong duoic rong"],
         unique: true
@@ -28,11 +29,12 @@ let productsSchema = mongoose.Schema({
         ref: 'category',
         required: true
     },
-    isDeleted:{
-        type:Boolean,
-        default:false
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
 })
-module.exports = new mongoose.model('product', productsSchema)
+
+module.exports = new mongoose.model('product', productSchema)
